@@ -1,0 +1,27 @@
+---
+- name: mariadb 서버 중지 및 삭제
+  hosts: all
+  vars:
+    mariadb_packages:
+      - mariadb-server
+      - python3-PyMySQL
+    mariadb_service: mariadb
+
+  tasks:
+    # 1. 서비스 종료
+    - name: "2. 서비스 중지 {{ mariadb_service }}"
+      service:
+        name: "{{ mariadb_service }}"
+        state: stopped
+
+
+    # 2. 패키지 삭제 - mariadb-server, python-PyMySQL
+    - name: 1. 패키지 삭제 - mariadb-server, python-PyMySQL
+      yum:
+        name: "{{ item }}"
+        state: absent
+      with_items: "{{ mariadb_packages }}"
+      when: ansible_distribution == 'CentOS'
+
+
+    

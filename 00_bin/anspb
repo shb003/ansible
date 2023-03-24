@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# ansible.cfg 
+cat << EOF > playbook.yml
+---
+- name: 
+  hosts: 
+  tasks:
+EOF

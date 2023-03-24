@@ -1,0 +1,22 @@
+---
+- name: playbook.yml 원복 
+  hosts: webserver
+  tasks:
+    # /etc/ansible/facts.d 디렉토리 삭제
+    # 웹 서비스 종료 = httpd
+    # 웹 패키지 삭제 = httpd
+    - name: 디렉토리 삭제 - /etc/ansible/fact.d
+      file:
+        path: /etc/ansible/fact.d
+        state: absent
+    
+    - name: 웹 서비스 종료 = httpd
+      service: 
+        name: httpd
+        state: started
+    
+    - name: 웹 패키지 삭제 = httpd
+      yum:
+        name: httpd
+        state: absent
+    

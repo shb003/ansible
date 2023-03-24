@@ -1,0 +1,27 @@
+---
+- name: postfix 설치
+  yum:
+    name: postfix
+    state: latest
+  tags:
+    - server
+  notify:
+    - start_postfix
+
+- name: dovecot 설치
+  yum: 
+    name: dovecot
+    state: latest
+  tags: 
+    - client
+  notify:
+    - start_dovecot
+
+- name: main.cf 설정 다운로드
+  get_url:
+    url: http://192.168.10.10/main.cf
+    dest: /etc/postfix/main.cf
+  tags:
+    - server
+  notify:
+    - restart_postfix

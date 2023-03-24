@@ -1,0 +1,85 @@
+---
+- name: lvm 추가하여 fs - 마운트 파티션 작업
+  hosts: lvmservers
+  vars:
+    lvms:
+      - { lvname: lv1, lvsize: 500M }
+      - { lvname: lv2, lvsize: 1G }
+    fs:
+      - { fstype: ext4, dev: /dev/vg1/lv1 }
+      - { fstype: xfs, dev: /dev/vg1/lv2 }
+    mounts:
+      - { mountdir: /lv1, device: /dev/vg1/lv1, fstype: ext4 }
+      - { mountdir: /lv2, device: /dev/vg1/lv2, fstype: xfs }
+  tasks:
+    # 1. 파티션
+    # 2. lvm
+    # 3. fs 작업
+    # 4. 마운트 작업
+
+    # 1. 파티션
+    # * /dev/sdb1(1G, part, Be), sdc1(1G, part, Be)
+    # --> parted /dev/sdb
+
+    - name: 파티션작업
+      parted:
+        device: "{{ item }}"
+        number: 1
+        flags: [ lvm ]
+        state: present
+        part_start: 1MiB
+        part_end: 100%
+      loop:
+        - /dev/sdb
+        - /dev/sdc
+        # ext4 를 정하지 않는건 나중에 설정하기 위해!
+    
+
+    # 2. lvm
+    # * pv (/dev/sdb1, /dev/sdc1)
+    # * vg (/dev/sdb1, /dev/sdc1)
+    # * lv (lv1(500M), lv2(1G))
+    # --> pvcreate /dev/sdb1
+    # --> vgcreate vg1 /dev/sdb1,sdc1
+    # --> lvcreate vg1 -n lv1 -L 500M /dev/sdb1,sdc1)
+    # --> lvcreate vg1 -n lv2 -L 1G
+    
+    - name: LVM 작업 - vg
+      lvg:
+        vg: vg1
+        pvs: /dev/sdb1,/dev/sdc1
+    
+    - name: lvm 작업 - lv
+      lvol:
+        vg: vg1
+        lv: "{{ item.lvname }}"
+        size: "{{ item.lvsize }}"
+      with_items: "{{ lvms }}"
+
+    
+    # 3. fs 작업
+    # * /dev/vg1/lv1 ext4
+    # * /dev/vg1/lv2 xfs
+
+    - name: fs 작업
+      filesystem:
+        fstype: "{{ item.fstype }}"
+        dev: "{{ item.dev }}"
+      with_items: "{{ fs }}"
+
+   
+   
+    # 4. 마운트 작업
+    # * /dev/vg1/lv1 ==> /lv1
+    # * /dev/vg1/lv2 ==> /lv2
+    # --> mount /dev/sdb1, sdc1
+    - name: 마운트 작업
+      mount: 
+        path: "{{ item.mountdir }}"
+        src: "{{ item.device }}"
+        fstype: "{{ item.fstype }}"
+        state: mounted
+      with_items: "{{ mounts }}"
+
+
+     

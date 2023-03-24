@@ -1,0 +1,8 @@
+---
+- name: /etc/hosts Test restore
+  hosts: all
+  tasks:
+    - name: /etc/hosts.j2 remove
+      file:
+        path: root/hosts.j2
+        state: absent

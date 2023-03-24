@@ -1,0 +1,15 @@
+---
+- name: 웹서버 설정
+  hosts: webserver
+  gather_facts: yes
+  tasks:
+  # 웹서버 설치
+  # 웹서버 기동
+    - name: 웹서버 설치
+      yum:
+        name: "{{ ansible_local.custom.general.package }}"
+        state: present
+    - name: 웹서버 기동
+      service:
+        name: "{{ ansible_local.custom.general.service }}"
+        state: "{{ ansible_local.custom.general.state }}"

@@ -1,0 +1,12 @@
+---
+- name: 설치 패키지 원복구성(기본상태)
+  hosts: all
+  tasks:
+    - name: 설치파일들 삭제 
+      yum:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - httpd
+        - mariadb-server
+        - mutt

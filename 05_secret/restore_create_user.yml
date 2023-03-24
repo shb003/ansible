@@ -1,0 +1,11 @@
+---
+- name: 사용자 제거 (원복)
+  hosts: webservers
+  vars_files:
+    - secret2.yml
+  tasks:
+    - name: user1 사용자 제거
+      user:
+        name: "{{ username }}"
+        state: absent
+        remove: yes

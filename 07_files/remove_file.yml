@@ -1,0 +1,8 @@
+---
+- name: 삭제
+  hosts: all
+  tasks:
+    -  name: 삭제
+       file:
+        path: /home/dev/ops/users.txt
+        state: absent

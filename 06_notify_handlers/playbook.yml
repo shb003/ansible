@@ -1,0 +1,52 @@
+---
+- name: mariadb 패키지 설치
+  force_handlers: yes
+  hosts: ansible3.example.com
+  gather_facts: no
+  vars:
+    db_packages:
+      - mariadb-server
+      - python3-PyMySQL
+    db_services: mariadb
+    
+    config_file_url: http://ansible.example.com/my.cnf.standard
+    config_file_dst: /etc/my.cnf
+  tasks:
+    # db 패키지 설치
+    # db 서비스 기동
+    # db 서비스 설정
+    # db 핸들러 서비스 재기동 설정
+      - name: "db 패키지 설치 {{ db_packages }}"
+        yum:
+          name: "{{ db_packages }}"
+          state: latest
+        notify:
+          - set db password
+  
+
+      - name: "db 서비스 기동 {{ db_services }}"
+        service:
+          name: "{{ db_services }}"
+          state: started
+          enabled: true
+
+      - name: db 서비스 설정
+        get_url:
+          url: "{{ config_file_url }}"
+          dest: "{{ config_file_dst }}"
+        notify:
+          - restart db service
+
+
+  
+  handlers:
+    - name: restart db service
+      service:
+        name: "{{ db_services }}"
+        state: restarted
+        enabled: true
+
+    - name: set db password
+      mysql_user:
+        name: root
+        password: soldesk1.

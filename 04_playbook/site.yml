@@ -1,0 +1,41 @@
+---
+- name: Install and start Apache httpd
+  hosts: webservers
+  tasks: 
+    # 1) 패키지 설치 (yum -y install httpd mod_ssl)
+    # 2) 서비스 설정 (cp files/index.html target:/var/www/html/index.html)
+    # 3) 서비스 기동(systemctl enable --now httpd)
+    # 4) 방화벽 등록 (firewall-cmd -permanent --add-service={http,https})
+    # 5) SElinux
+
+    # 1) 패키지 설치 (yum -y install httpd mod_ssl)
+    - name: install the package - httpd, mod_ssl
+      yum:
+        name:
+          - httpd
+          - mod_ssl
+        state: present
+    # 2) 서비스 설정 (cp files/index.html target:/var/www/html/index.html)
+    - name: (2) configure the web service with httpd
+      copy:
+        src: files/index.html
+        dest: /var/www/html/index.html
+
+    # 3) 서비스 기동(systemctl enable --now httpd)
+    - name: (3) Start the web service
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+        
+    # 4) 방화벽 등록 (firewall-cmd -permanent --add-service={http,https})
+    - name: configure the firewall with firewalld
+      firewalld:
+        service: http
+        permanent: yes
+        immediate: yes
+        state: enabled
+      loop:
+        - http
+        - https
+    # 5) SElinux

@@ -1,0 +1,44 @@
+---
+- name:  restore_ https 서버 구축
+  hosts: webservers
+  gather_facts: yes
+  vars_files: vars.yml 
+  tasks:
+    
+    # 1. 방화벽 해제 - http, https
+    - name: 방화벽 해제 - http, https
+      firewalld:
+        service: "{{ item }}"
+        permanent: no
+        immediate: no
+        state: disabled
+      with_items: "{{ fw_web }}"
+    
+    # 2. 서비스 중지 = httpd, firewalld
+    - name: 서비스 중지 = httpd, firewalld
+      service:
+        name: "{{ item }}"
+        state: stopped
+        enabled: yes
+      loop: "{{ services }}"
+    
+    # 3. /var/www/html/index.html 파일 삭제
+    - name: /var/www/html/index.html 파일 삭제
+      file:
+        path: "{{ ind_dest }}"
+        state: absent
+
+    
+    # 4. 패키지 삭제 = httpd , mod_ssl, firewalld
+    - name: 패키지 삭제 = httpd , mod_ssl, firewalld
+      yum:
+        name: "{{ packages }}"
+        state: absent
+
+    
+    
+
+
+
+
+    

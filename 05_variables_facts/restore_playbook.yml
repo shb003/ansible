@@ -1,0 +1,55 @@
+---
+- name: playbook 원복
+  hosts: ansible1.example.com
+  vars_files: 
+  - vars/vars.yml
+  - vars/vars2.yml
+  tasks:
+
+  # 방화벽 서비스 해제 http, https
+  - name: 방화벽 서비스 해제 http, https
+    firewalld:
+      service: "{{ item }}"
+      permanent: no
+      immediate: no
+      state: disabled
+    ignore_errors: yes
+    loop:
+      - "{{ fw_http }}"
+      - "{{ fw_https }}"
+  
+      
+  # 서비스 해제 firewalld, httpd
+  - name: 서비스 해제 firewalld, httpd
+    service:
+      name: "{{ item }}"
+      state: stopped
+    loop:
+      - "{{ svc_fw }}"
+      - "{{ svc_web }}"
+    ignore_errors: yes
+
+
+  # /var/www/html 디렉토리 삭제
+  - name: /var/www/html 디렉토리 삭제
+    file:
+      path: /var/www/html
+      state: absent
+
+
+  # /etc/secrets 디렉토리 삭제
+  - name: /etc/secrets 디렉토리 삭제
+    file:
+      path: /etc/secrets
+      state: absent
+
+
+  # 패키지 삭제 -firewalld, http , mod_ssl
+  - name: 패키지 삭제 -firewalld, http , mod_ssl
+    yum:
+      name: "{{ item }}"
+      state: absent
+    loop:
+      - "{{ pkg_fw }}"
+      - "{{ pkg_https }}"
+      - "{{ pkg_web }}"

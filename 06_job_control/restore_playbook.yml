@@ -1,0 +1,26 @@
+---
+- name: Restore Task Failure Exercise
+  hosts: databases
+  gather_facts: no
+  vars:
+    web_package: httpd    
+    db_package: mariadb-server
+    db_service: mariadb
+
+  tasks:
+    - name: stop {{ db_service }} service
+      service:
+        name: "{{ db_service }}"
+        state: stopped
+        enabled: yes
+
+    - name: Remove {{ web_package }} package
+      yum:
+        name: "{{ web_package }}"
+        state: absent
+      
+     
+    - name: Remove {{ db_package }} package
+      yum:
+        name: "{{ db_package }}"
+        state: absent

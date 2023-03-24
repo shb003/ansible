@@ -1,0 +1,46 @@
+---
+- name: restore instranet.yml
+  hosts: all
+  tasks:
+    # 방화벽 포트 내리기
+    # (1) 방화벽 포트 내리기 - http, https
+    # (2) 서비스 정지 - httpd, firewalld
+    # (3) 파일 삭제 - /var/www/html/index.html
+    # (4) 패키지 삭제 - httpd, mod_ssl, firewalld
+    
+    - name: 방화벽 포트 내리기 - http, https
+      firewalld:
+        service: "{{ item }}"
+        permanent: no
+        immediate: no
+        state: disabled
+      loop:
+        - http
+        - https
+    
+    - name: 서비스 정지 - httpd, firewalld
+      service:
+        name: "{{ item }}"
+        state: stopped
+        enabled: no
+      loop:
+        - httpd
+        - firewalld
+
+    - name: 파일 삭제 - /var/www/html/index.html
+      file:
+        path: /var/www/html/index.html
+        state: absent
+    
+    - name: 패키지 삭제 - httpd, mod_ssl, firewalld
+      yum:
+        name:
+          - httpd
+          - mod_ssl
+          - firewalld
+        state: absent
+      ignore_errors: true
+    
+
+    
+
